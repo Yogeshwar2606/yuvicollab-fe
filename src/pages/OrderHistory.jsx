@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
-
+const API_URL = import.meta.env.VITE_API_URL;
+const API = `${API_URL}/api`;
 const OrderHistory = () => {
   const user = useSelector(state => state.user.user);
   const [orders, setOrders] = useState([]);
@@ -26,7 +27,7 @@ const OrderHistory = () => {
         console.log('OrderHistory: Fetching orders for user:', user.id);
         console.log('OrderHistory: Using token:', user.token.substring(0, 20) + '...');
         
-        const response = await fetch('http://localhost:5000/api/orders', {
+        const response = await fetch(`${API}/orders`, {
           headers: {
             'Authorization': `Bearer ${user.token}`,
             'Content-Type': 'application/json'

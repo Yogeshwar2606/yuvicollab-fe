@@ -10,10 +10,11 @@ const OrderDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  const API_URL = import.meta.env.VITE_API_URL;
+  const API = `${API_URL}/api`;
   useEffect(() => {
     if (!user) return;
-    fetch(`http://localhost:5000/api/orders/${id}`, { headers: { Authorization: `Bearer ${user.token}` } })
+    fetch(`${API}/orders/${id}`, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(res => res.json())
       .then(data => { setOrder(data); setLoading(false); })
       .catch(() => { setError('Failed to fetch order'); setLoading(false); });

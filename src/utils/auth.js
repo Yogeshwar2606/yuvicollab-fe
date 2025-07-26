@@ -2,7 +2,8 @@ import { logout } from '../../redux/userSlice';
 import { clearCart } from '../../redux/cartSlice';
 import { clearWishlist } from '../../redux/wishlistSlice';
 import { setCart } from '../../redux/cartSlice';
-
+const API_URL = import.meta.env.VITE_API_URL;
+const API = `${API_URL}/api`;
 export const handleLogout = (dispatch, navigate) => {
   // Clear all user-related state
   dispatch(logout());
@@ -19,7 +20,7 @@ export const handleLogout = (dispatch, navigate) => {
 
 export const fetchUserCart = async (token) => {
   try {
-    const response = await fetch('http://localhost:5000/api/cart', {
+    const response = await fetch(`${API}/cart`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -55,7 +56,7 @@ export const syncCartWithBackend = async (token, cartItems) => {
   try {
     // The backend expects individual items, so we'll sync each item
     for (const item of cartItems) {
-      const response = await fetch('http://localhost:5000/api/cart', {
+      const response = await fetch(`${API}/cart`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -82,7 +83,7 @@ export const syncCartWithBackend = async (token, cartItems) => {
 
 export const fetchUserWishlist = async (token) => {
   try {
-    const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch(`${API}/wishlist`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

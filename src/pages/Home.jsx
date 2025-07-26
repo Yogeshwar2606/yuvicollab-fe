@@ -72,13 +72,14 @@ const Home = () => {
   const cart = useSelector(state => state.cart.items);
   const user = useSelector(state => state.user.user);
   const recentlyViewed = useSelector(state => state.user.recentlyViewedProducts);
-
+  const API_URL = import.meta.env.VITE_API_URL;
+  const API = `${API_URL}/api`;
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         console.log('Fetching products...');
-        const res = await fetch('http://localhost:5000/api/products');
+        const res = await fetch(`${API}/products`);
         console.log('Response status:', res.status);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();

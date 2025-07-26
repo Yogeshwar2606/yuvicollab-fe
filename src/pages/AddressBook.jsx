@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Plus, Edit, Trash2, Star, StarOff, Phone, MapPin } from 'lucide-react';
-
-const API = 'http://localhost:5000/api/address';
+const API_URL = import.meta.env.VITE_API_URL;
+const API = `${API_URL}/address`;
 
 const AddressBook = () => {
   const user = useSelector(state => state.user.user);

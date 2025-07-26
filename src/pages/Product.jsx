@@ -22,7 +22,8 @@ const Product = () => {
 
   const wishlist = useSelector(state => state.wishlist.items);
   const user = useSelector(state => state.user.user);
-
+  const API_URL = import.meta.env.VITE_API_URL;
+  const API = `${API_URL}/api`;
   // Similar Products Component
   const SimilarProducts = ({ currentProduct }) => {
     const [similarProducts, setSimilarProducts] = useState([]);
@@ -32,7 +33,7 @@ const Product = () => {
     useEffect(() => {
       const fetchSimilarProducts = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/products/similar/${currentProduct._id}?category=${currentProduct.category}&limit=4`);
+          const response = await fetch(`${API}/products/similar/${currentProduct._id}?category=${currentProduct.category}&limit=4`);
           if (response.ok) {
             const data = await response.json();
             setSimilarProducts(data);
