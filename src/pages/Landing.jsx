@@ -54,9 +54,9 @@ const Landing = () => {
       icon: <TreePine size={64} />,
       title: "Beautiful Landscapes",
       description:
-        "Bring nature indoors with our stunning landscape art and outdoor décor collection that inspires tranquility.",
+        "Discover luxurious properties and prime real estate opportunities that redefine modern living and investment.",
       image:
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&h=400&fit=crop",
       color: "#10b981",
       accent: "green",
     },
@@ -105,7 +105,7 @@ const Landing = () => {
     {
       title: "Nature Meets Design",
       subtitle: "Beautiful Landscapes for Every Space",
-      bg: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1400&h=900&fit=crop",
+      bg: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1400&h=900&fit=crop",
       overlay: "rgba(16, 185, 129, 0.3)",
     },
   ];

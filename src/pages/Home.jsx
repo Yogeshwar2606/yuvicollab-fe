@@ -32,7 +32,7 @@ const bannerSlides = [
     category: "Furniture",
     gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     icon: <Gift size={24} />,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=400&fit=crop"
+    image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e"
   },
   {
     title: "Latest Electronics",
@@ -41,16 +41,16 @@ const bannerSlides = [
     category: "Electronics",
     gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     icon: <Zap size={24} />,
-    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&h=400&fit=crop"
+    image: "https://images.unsplash.com/photo-1516163109866-e9d98630a0a6"
   },
   {
     title: "Beautiful Landscapes",
-    subtitle: "Transform your space with nature's beauty",
-    cta: "Discover",
+    subtitle: "Discover Premium Real Estate Properties",
+    cta: "Explore",
     category: "Landscapes",
     gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
     icon: <TrendingUp size={24} />,
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop"
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9"
   }
 ];
 
@@ -72,14 +72,13 @@ const Home = () => {
   const cart = useSelector(state => state.cart.items);
   const user = useSelector(state => state.user.user);
   const recentlyViewed = useSelector(state => state.user.recentlyViewedProducts);
-  const API_URL = import.meta.env.VITE_API_URL;
-  const API = `${API_URL}/api`;
+
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         console.log('Fetching products...');
-        const res = await fetch(`${API}/products`);
+        const res = await fetch('http://localhost:5000/api/products');
         console.log('Response status:', res.status);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
@@ -566,7 +565,7 @@ const Home = () => {
 
         /* Hero Banner */
         .hero-banner {
-          height: 60vh;
+          height: 70vh; /* Increased height for better banner display */
           position: relative;
           overflow: hidden;
           margin-bottom: 2rem;
@@ -580,8 +579,6 @@ const Home = () => {
 
         .banner-slide {
           position: absolute;
-          top: 0;
-          left: 0;
           width: 100%;
           height: 100%;
           display: flex;
@@ -595,6 +592,12 @@ const Home = () => {
         .banner-slide.active {
           opacity: 1;
           transform: translateX(0);
+        }
+
+        .banner-slide {
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
         }
 
         .banner-content {
