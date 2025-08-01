@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Plus, Edit, Trash2, Star, StarOff, Phone, MapPin, User, Package } from 'lucide-react';
 
-const API = 'http://localhost:5000/api/address';
+const API = `${import.meta.env.VITE_API_URL}/api/address`;
 
 const AddressBook = () => {
   const user = useSelector(state => state.user.user);
@@ -22,7 +22,7 @@ const AddressBook = () => {
       .then(data => { setAddresses(data); setLoading(false); })
       .catch(e => { setError('Failed to load addresses'); setLoading(false); });
   }, [user]);
-
+  
   // Open form for add/edit
   const openForm = (address = null) => {
     setEditId(address ? address._id : null);

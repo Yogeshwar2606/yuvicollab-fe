@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle, MapPin, Phone } from 'lucide-react';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const OrderDetails = () => {
   const user = useSelector(state => state.user.user);
   const { id } = useParams();
@@ -13,7 +13,7 @@ const OrderDetails = () => {
 
   useEffect(() => {
     if (!user) return;
-    fetch(`http://localhost:5000/api/orders/${id}`, { headers: { Authorization: `Bearer ${user.token}` } })
+      fetch(`${API_URL}/api/orders/${id}`, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(res => res.json())
       .then(data => { setOrder(data); setLoading(false); })
       .catch(() => { setError('Failed to fetch order'); setLoading(false); });

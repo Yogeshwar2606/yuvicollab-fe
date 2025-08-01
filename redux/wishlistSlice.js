@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
+const API_URL = import.meta.env.VITE_API_URL;
 // Async thunks
 export const fetchWishlist = createAsyncThunk('wishlist/fetchWishlist', async (token) => {
-  const res = await fetch('http://localhost:5000/api/wishlist', {
+  const res = await fetch(`${API_URL}/api/wishlist`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error('Failed to fetch wishlist');
@@ -11,7 +11,7 @@ export const fetchWishlist = createAsyncThunk('wishlist/fetchWishlist', async (t
 });
 
 export const addWishlistItem = createAsyncThunk('wishlist/addWishlistItem', async ({ productId, token }) => {
-  const res = await fetch('http://localhost:5000/api/wishlist', {
+  const res = await fetch(`${API_URL}/api/wishlist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ product: productId }),
@@ -22,7 +22,7 @@ export const addWishlistItem = createAsyncThunk('wishlist/addWishlistItem', asyn
 });
 
 export const removeWishlistItem = createAsyncThunk('wishlist/removeWishlistItem', async ({ itemId, token }) => {
-  const res = await fetch(`http://localhost:5000/api/wishlist/${itemId}`, {
+  const res = await fetch(`${API_URL}/api/wishlist/${itemId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -32,7 +32,7 @@ export const removeWishlistItem = createAsyncThunk('wishlist/removeWishlistItem'
 });
 
 export const clearWishlistAsync = createAsyncThunk('wishlist/clearWishlist', async (token) => {
-  const res = await fetch('http://localhost:5000/api/wishlist', {
+    const res = await fetch(`${API_URL}/api/wishlist`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });

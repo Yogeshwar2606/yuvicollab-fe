@@ -16,10 +16,10 @@ const Checkout = () => {
   const [paying, setPaying] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     if (!user) return;
-    fetch('http://localhost:5000/api/address', { headers: { Authorization: `Bearer ${user.token}` } })
+    fetch(`${API_URL}/api/address`, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(res => res.json())
       .then(data => {
         setAddresses(data);
@@ -49,7 +49,7 @@ const Checkout = () => {
       const ok = await loadRazorpayScript();
       if (!ok) throw new Error('Failed to load Razorpay');
       // 1. Create Razorpay order
-      const res = await fetch('http://localhost:5000/api/orders/razorpay-order', {
+      const res = await fetch(`${API_URL}/api/orders/razorpay-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
         body: JSON.stringify({ amount: subtotal }),
@@ -66,7 +66,7 @@ const Checkout = () => {
         order_id: data.orderId,
         handler: async function (response) {
           // 3. Verify payment
-          const verifyRes = await fetch('http://localhost:5000/api/orders/verify-payment', {
+          const verifyRes = await fetch(`${API_URL}/api/orders/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
             body: JSON.stringify({
@@ -84,7 +84,7 @@ const Checkout = () => {
           // 4. Place order
           const addressObj = addresses.find(a => a._id === selectedAddress);
           const items = cart.map(item => ({ product: item.product, quantity: item.quantity, price: item.price, name: item.name, image: item.image }));
-          const orderRes = await fetch('http://localhost:5000/api/orders', {
+            const orderRes = await fetch(`${API_URL}/api/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
             body: JSON.stringify({

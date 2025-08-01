@@ -6,7 +6,7 @@ import { setUser } from '../../redux/userSlice';
 import { setCart } from '../../redux/cartSlice';
 import { setWishlist } from '../../redux/wishlistSlice';
 import { fetchUserCart, fetchUserWishlist } from '../utils/auth';
-
+const API_URL = import.meta.env.VITE_API_URL;
 function Register() {
   const [formData, setFormData] = useState({
     name: '',
@@ -32,7 +32,7 @@ function Register() {
     setSuccess(false);
     
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+          const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

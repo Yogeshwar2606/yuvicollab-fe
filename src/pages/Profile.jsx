@@ -21,7 +21,7 @@ const Profile = () => {
   const [orderStats, setOrderStats] = useState({ total: 0, pending: 0, delivered: 0, shipped: 0, paid: 0 });
   const [orderStatsLoading, setOrderStatsLoading] = useState(true);
   const recentlyViewed = useSelector(state => state.user.recentlyViewedProducts);
-
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const Profile = () => {
     
     // Fetch addresses
     setAddressLoading(true);
-    fetch('http://localhost:5000/api/address', { headers: { Authorization: `Bearer ${user.token}` } })
+    fetch(`${API_URL}/api/address`, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(res => res.json())
       .then(data => {
         const def = data.find(a => a.isDefault);
@@ -45,7 +45,7 @@ const Profile = () => {
 
     // Fetch order statistics
     setOrderStatsLoading(true);
-    fetch('http://localhost:5000/api/orders', { headers: { Authorization: `Bearer ${user.token}` } })
+    fetch(`${API_URL}/api/orders`, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(res => res.json())
       .then(data => {
         const total = data.length;
@@ -75,7 +75,7 @@ const Profile = () => {
     console.log('Saving profile with data:', { name, email, phone });
     
     try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', {
+        const res = await fetch(`${API_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

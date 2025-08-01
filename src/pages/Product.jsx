@@ -6,7 +6,7 @@ import { addWishlistItem, removeWishlistItem } from '../../redux/wishlistSlice';
 import { addRecentlyViewed } from '../../redux/userSlice';
 import { Heart } from 'lucide-react';
 import { Star, X } from 'lucide-react';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const Product = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -33,7 +33,7 @@ const Product = () => {
     useEffect(() => {
       const fetchSimilarProducts = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/products/similar/${currentProduct._id}?category=${currentProduct.category}&limit=4`);
+          const response = await fetch(`${API_URL}/api/products/similar/${currentProduct._id}?category=${currentProduct.category}&limit=4`);
           if (response.ok) {
             const data = await response.json();
             setSimilarProducts(data);
@@ -146,7 +146,7 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await fetch(`${API_URL}/api/products/${id}`);
         if (!res.ok) throw new Error('Product not found');
         const data = await res.json();
         setProduct(data);
@@ -239,7 +239,7 @@ const Product = () => {
     }
     setSubmittingReview(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${product._id}/reviews`, {
+          const response = await fetch(`${API_URL}/api/products/${product._id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
