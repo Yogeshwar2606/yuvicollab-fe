@@ -1,15 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Sofa, Smartphone, TreePine, ShoppingCart, Heart, Star, TrendingUp, Zap, Gift, Trash2 } from 'lucide-react';
+import { Search, Sofa, Smartphone, TreePine, ShoppingCart, Heart, Star, TrendingUp, Zap, Gift, Trash2, ShoppingBag, ChevronDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCartWithSync } from '../utils/cartUtils';
 import { addWishlistItem, removeWishlistItem } from '../../redux/wishlistSlice';
 import { useNavigate } from 'react-router-dom';
 
 const categories = [
-  { label: 'All', value: '', icon: <Star size={20} /> },
-  { label: 'Furniture', value: 'Furniture', icon: <Sofa size={20} /> },
-  { label: 'Electronics', value: 'Electronics', icon: <Smartphone size={20} /> },
-  { label: 'Landscapes', value: 'Landscapes', icon: <TreePine size={20} /> },
+  { label: 'All', value: '', icon: <Star size={18} /> },
+  { label: 'Furniture', value: 'Furniture', icon: <Sofa size={18} /> },
+  { label: 'Electronics', value: 'Electronics', icon: <Smartphone size={18} /> },
+  { 
+    label: 'Real Estate', 
+    value: 'Landscapes', 
+    icon: <TreePine size={18} />,
+    subcategories: [
+      { label: 'All Real Estate', value: 'Landscapes' },
+      { label: 'Land Plots', value: 'Landscapes_Plots' },
+      { label: 'Individual Houses', value: 'Landscapes_Houses' },
+      { label: 'Villas', value: 'Landscapes_Villas' },
+      { label: 'Flats', value: 'Landscapes_Flats' }
+    ]
+  },
 ];
 
 const sortOptions = [
@@ -44,13 +55,18 @@ const bannerSlides = [
     image: "https://images.unsplash.com/photo-1516163109866-e9d98630a0a6"
   },
   {
-    title: "Beautiful Landscapes",
-    subtitle: "Discover Premium Real Estate Properties",
+    title: "Premium Real Estate",
+    subtitle: "Discover Plots, Houses & Luxury Villas",
     cta: "Explore",
     category: "Landscapes",
     gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
     icon: <TrendingUp size={24} />,
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9"
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9",
+    subcategories: [
+      { label: 'Land Plots', value: 'Landscapes_Plots' },
+      { label: 'Individual Houses', value: 'Landscapes_Houses' },
+      { label: 'Villas', value: 'Landscapes_Villas' }
+    ]
   }
 ];
 
@@ -61,10 +77,26 @@ const Home = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [sortBy, setSortBy] = useState('default');
+  const [showSubcategories, setShowSubcategories] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [bannerParallax, setBannerParallax] = useState(0);
   const parallaxTarget = useRef(0);
   const parallaxCurrent = useRef(0);
+  const dropdownRef = useRef(null);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowSubcategories(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -131,11 +163,30 @@ const Home = () => {
     };
   }, []);
 
-  const filteredProducts = products.filter(
-    p =>
-      (!category || p.category === category) &&
-      (p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredProducts = products.filter(p => {
+    // Check if the category matches (including subcategories)
+    let categoryMatch = true;
+    
+    if (category) {
+      if (category === 'Landscapes') {
+        // Show all real estate products
+        categoryMatch = p.category === 'Landscapes';
+      } else if (category.startsWith('Landscapes_')) {
+        // Show specific real estate subcategory
+        const subcategory = category.split('_')[1];
+        categoryMatch = p.category === 'Landscapes' && p.subcategory === subcategory;
+      } else {
+        // Show other categories normally
+        categoryMatch = p.category === category;
+      }
+    }
+
+    // Check if search term matches name or description
+    const searchMatch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+      p.description.toLowerCase().includes(search.toLowerCase());
+
+    return categoryMatch && searchMatch;
+  });
 
   // Sort products based on selected option
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -221,6 +272,18 @@ const Home = () => {
     }
   };
 
+  const handleBuyNow = (e, product) => {
+    e.stopPropagation();
+    if (!user) {
+      alert('Please log in to continue with purchase');
+      return;
+    }
+    if (product.stock === 0) return;
+    
+    // Add to cart and redirect to checkout
+    addToCartWithSync(dispatch, user, product, 1);
+    navigate('/checkout');
+  };
 
 
   return (
@@ -250,14 +313,17 @@ const Home = () => {
           </div>
           <div className="categories">
             {categories.map(cat => (
-              <button
-                key={cat.label}
-                className={`category-btn ${category === cat.value ? 'active' : ''}`}
-                onClick={() => setCategory(cat.value)}
-              >
-                <span className="category-icon">{cat.icon}</span>
-                {cat.label}
-              </button>
+              <div key={cat.label} className="category-group">
+                <button 
+                  className={`category-button ${category.startsWith('Landscapes') ? 'active' : ''}`}
+                  onClick={() => {
+                    setCategory(category.startsWith('Landscapes') ? '' : 'Landscapes');
+                  }}
+                >
+                  {cat.icon}
+                  <span>{cat.label}</span>
+                </button>
+              </div>
             ))}
           </div>
           <div className="sort-container">
@@ -307,6 +373,33 @@ const Home = () => {
           
         </div>
       </section>
+
+      {/* Real Estate Filters */}
+      {category.startsWith('Landscapes') && (
+        <div className="real-estate-filters">
+          <div className="filter-chips">
+            {categories.find(cat => cat.value === 'Landscapes').subcategories.map(sub => (
+              <button
+                key={sub.value}
+                className={`filter-chip ${category === sub.value ? 'active' : ''}`}
+                onClick={() => {
+                  // If clicking the active chip, clear the filter
+                  if (category === sub.value) {
+                    setCategory('');
+                  } else {
+                    setCategory(sub.value);
+                  }
+                }}
+              >
+                {sub.label}
+                {category === sub.value && (
+                  <span className="active-indicator">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Products Section */}
       <div className="products-section">
@@ -371,54 +464,66 @@ const Home = () => {
                   
                   <div className="product-price">₹{Number(product.price).toLocaleString('en-IN')}</div>
                   
-                  {/* Enhanced Cart Button */}
-                  {isInCart(product._id) ? (
-                    <div className="cart-qty-control">
-                      <button
-                        className="qty-btn"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleUpdateQuantity(product, getCartItemQuantity(product._id) - 1);
-                        }}
-                        disabled={getCartItemQuantity(product._id) <= 1}
-                      >
-                        –
-                      </button>
-                      <span className="qty-count">{getCartItemQuantity(product._id)}</span>
-                      <button
-                        className="qty-btn"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleUpdateQuantity(product, getCartItemQuantity(product._id) + 1);
-                        }}
-                        disabled={getCartItemQuantity(product._id) >= product.stock}
-                      >
-                        +
-                      </button>
-                      <button
-                        className="qty-btn trash"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleRemoveFromCart(product);
-                        }}
-                        title="Remove from cart"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className={`add-to-cart-btn ${product.stock === 0 ? 'disabled' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                      disabled={product.stock === 0}
-                    >
-                      <ShoppingCart size={18} />
-                      <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-                    </button>
-                  )}
+                  {/* Cart and Buy Now Buttons */}
+                  <div className="product-buttons">
+                    {isInCart(product._id) ? (
+                      <div className="cart-qty-control">
+                        <button
+                          className="qty-btn"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleUpdateQuantity(product, getCartItemQuantity(product._id) - 1);
+                          }}
+                          disabled={getCartItemQuantity(product._id) <= 1}
+                        >
+                          –
+                        </button>
+                        <span className="qty-count">{getCartItemQuantity(product._id)}</span>
+                        <button
+                          className="qty-btn"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleUpdateQuantity(product, getCartItemQuantity(product._id) + 1);
+                          }}
+                          disabled={getCartItemQuantity(product._id) >= product.stock}
+                        >
+                          +
+                        </button>
+                        <button
+                          className="qty-btn trash"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleRemoveFromCart(product);
+                          }}
+                          title="Remove from cart"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          className={`add-to-cart-btn ${product.stock === 0 ? 'disabled' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          disabled={product.stock === 0}
+                        >
+                          <ShoppingCart size={18} />
+                          <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                        </button>
+                        <button
+                          className={`buy-now-btn ${product.stock === 0 ? 'disabled' : ''}`}
+                          onClick={(e) => handleBuyNow(e, product)}
+                          disabled={product.stock === 0}
+                        >
+                          <ShoppingBag size={18} />
+                          <span>Buy Now</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -883,11 +988,191 @@ const Home = () => {
           align-items: center;
         }
 
+        .category-group {
+          position: relative;
+          display: inline-block;
+        }
+
+        .category-filter {
+          position: relative;
+          display: inline-block;
+        }
+
+        .category-filter.with-dropdown .category-button {
+          padding-right: 2.5rem;
+        }
+
+        .category-button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: white;
+          border: none;
+          border-radius: 50px;
+          padding: 0.7rem 1.2rem;
+          color: #666;
+          font-weight: 500;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          position: relative;
+          min-width: 120px;
+          justify-content: center;
+        }
+
+        .category-button svg {
+          color: #7E72B5;
+        }
+
+        .category-button:hover {
+          background: #f8f9fa;
+        }
+
+        .category-button.active {
+          background: #7E72B5;
+          color: white;
+        }
+
+        .category-button.active svg {
+          color: white;
+        }
+
+        .dropdown-arrow {
+          position: absolute;
+          right: 0.8rem;
+          color: #7E72B5;
+          transition: transform 0.2s ease;
+          width: 16px !important;
+          height: 16px !important;
+        }
+
+        .category-button.active .dropdown-arrow {
+          color: white;
+        }
+
+        .dropdown-arrow.open {
+          transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+          position: absolute;
+          top: calc(100% + 0.3rem);
+          left: 0;
+          min-width: 100%;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          padding: 0.4rem;
+          z-index: 1000;
+          animation: slideDown 0.2s ease-out;
+        }
+
+        .dropdown-item {
+          width: 100%;
+          text-align: left;
+          padding: 0.6rem 1rem;
+          border: none;
+          background: none;
+          color: #666;
+          font-weight: 500;
+          cursor: pointer;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+          font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+          background: #f8f9fa;
+          color: #7E72B5;
+        }
+
+        .dropdown-item.active {
+          background: #7E72B5;
+          color: white;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Real Estate Filters */
+        .real-estate-filters {
+          padding: 1rem 2rem;
+          margin: 0 1rem;
+          background: rgba(255,255,255,0.95);
+          border-radius: 20px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .filter-chips {
+          display: flex;
+          gap: 0.8rem;
+          flex-wrap: wrap;
+        }
+
+        .filter-chip {
+          padding: 0.6rem 1.2rem;
+          border-radius: 50px;
+          border: 1px solid #e0e0e0;
+          background: white;
+          color: #666;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .filter-chip:hover {
+          border-color: #7E72B5;
+          color: #7E72B5;
+          transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+          background: #7E72B5;
+          color: white;
+          border-color: #7E72B5;
+        }
+
+        .active-indicator {
+          font-size: 0.8rem;
+          margin-left: 0.2rem;
+        }
+
         /* Sort Options */
         .sort-container {
           display: flex;
           align-items: center;
           margin-left: 0.5rem;
+          gap: 0.5rem;
+        }
+
+        .subcategory-select {
+          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+          color: white;
+          border-color: rgba(255,255,255,0.4);
+        }
+
+        .subcategory-select option {
+          background: white;
+          color: #333;
         }
 
         .sort-select {
@@ -1075,12 +1360,19 @@ const Home = () => {
           margin-bottom: 1rem;
         }
 
+        .product-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+
         .add-to-cart-btn {
           width: 100%;
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
           border: none;
-          border-radius: 15px;
+          border-radius: 12px 12px 4px 4px;
           padding: 0.8rem 1rem;
           font-weight: 600;
           font-size: 1rem;
@@ -1092,15 +1384,35 @@ const Home = () => {
           transition: all 0.3s ease;
         }
 
-        .add-to-cart-btn:hover:not(.disabled) {
-          background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        .buy-now-btn {
+          width: 100%;
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: white;
+          border: none;
+          border-radius: 4px 4px 12px 12px;
+          padding: 0.8rem 1rem;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover:not(.disabled),
+        .buy-now-btn:hover:not(.disabled) {
           transform: translateY(-2px);
+          background: linear-gradient(135deg, #5a67d8, #6b46c1);
           box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
 
-        .add-to-cart-btn.disabled {
+        .add-to-cart-btn.disabled,
+        .buy-now-btn.disabled {
           background: #ccc;
           cursor: not-allowed;
+          opacity: 0.6;
         }
 
 

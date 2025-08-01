@@ -19,6 +19,7 @@ const Product = () => {
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const wishlist = useSelector(state => state.wishlist.items);
   const user = useSelector(state => state.user.user);
@@ -180,6 +181,18 @@ const Product = () => {
   const handleAddToCart = () => {
     if (quantity < 1 || quantity > product.stock) return;
     addToCartWithSync(dispatch, user, product, quantity);
+  };
+
+  const handleBuyNow = () => {
+    if (!user) {
+      alert('Please log in to continue with purchase');
+      return;
+    }
+    if (quantity < 1 || quantity > product.stock) return;
+    
+    // Add to cart and redirect to checkout
+    addToCartWithSync(dispatch, user, product, quantity);
+    navigate('/checkout');
   };
 
   const nextImage = () => {
@@ -391,9 +404,22 @@ const Product = () => {
               }}
               style={styles.qtyInput}
             />
-            <button style={styles.cartBtn} onClick={handleAddToCart} disabled={product.stock === 0}>
-              {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-            </button>
+            <div style={styles.buttonGroup}>
+              <button 
+                style={styles.cartBtn} 
+                onClick={handleAddToCart} 
+                disabled={product.stock === 0}
+              >
+                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </button>
+              <button 
+                style={styles.buyNowBtn} 
+                onClick={handleBuyNow}
+                disabled={product.stock === 0}
+              >
+                Buy Now
+              </button>
+            </div>
           </div>
           <p style={styles.stock}>{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</p>
           
@@ -734,18 +760,55 @@ const styles = {
     border: '1.5px solid #e5e7eb',
     textAlign: 'center',
   },
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    flex: 1,
+  },
   cartBtn: {
     background: 'linear-gradient(90deg, #a78bfa, #f472b6)',
     color: '#fff',
     border: 'none',
-    borderRadius: 12,
+    borderRadius: '12px 12px 4px 4px',
     padding: '0.75rem 2rem',
     fontWeight: 700,
     fontSize: '1.1rem',
     cursor: 'pointer',
     boxShadow: '0 2px 8px #a78bfa33',
-    transition: 'background 0.2s, transform 0.2s',
+    transition: 'all 0.2s',
     outline: 'none',
+    width: '100%',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px #a78bfa55',
+    },
+    '&:disabled': {
+      opacity: 0.6,
+      cursor: 'not-allowed',
+    },
+  },
+  buyNowBtn: {
+    background: 'linear-gradient(90deg, #667eea, #764ba2)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px 4px 12px 12px',
+    padding: '0.75rem 2rem',
+    fontWeight: 700,
+    fontSize: '1.1rem',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px #667eea33',
+    transition: 'all 0.2s',
+    outline: 'none',
+    width: '100%',
+    '&:hover': {
+      transform: 'translateY(2px)',
+      boxShadow: '0 4px 12px #667eea55',
+    },
+    '&:disabled': {
+      opacity: 0.6,
+      cursor: 'not-allowed',
+    },
   },
   stock: {
     color: '#888',

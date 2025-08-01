@@ -34,14 +34,22 @@ export const fetchUserCart = async (token) => {
     console.log('Fetched cart data:', data);
     
     // Transform backend cart items to frontend format
-    const transformedItems = (data.items || []).map(item => ({
-      product: item.product._id || item.product,
-      quantity: item.quantity,
-      name: item.product.name || 'Unknown Product',
-      price: Number(item.product.price) || 0,
-      image: item.product.images ? item.product.images[0] : '',
-      stock: item.product.stock || 1
-    }));
+    const transformedItems = (data.items || []).map(item => {
+      // Ensure we have the product data
+      if (!item.product) {
+        console.warn('Cart item missing product data:', item);
+        return null;
+      }
+
+      return {
+        product: item.product._id || item.product,
+        quantity: item.quantity || 1,
+        name: item.product.name || 'Unknown Product',
+        price: Number(item.product.price) || 0,
+        image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : '',
+        stock: typeof item.product.stock === 'number' ? item.product.stock : 1
+      };
+    }).filter(Boolean); // Remove any null items
     
     console.log('Transformed cart items:', transformedItems);
     return transformedItems;
@@ -53,26 +61,48 @@ export const fetchUserCart = async (token) => {
 
 export const syncCartWithBackend = async (token, cartItems) => {
   try {
-    // The backend expects individual items, so we'll sync each item
-    for (const item of cartItems) {
-      const response = await fetch('http://localhost:5000/api/cart', {
+    console.log('Syncing cart items:', cartItems);
+    
+    // First, clear the existing cart on the backend
+    const clearResponse = await fetch('http://localhost:5000/api/cart', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!clearResponse.ok) {
+      throw new Error('Failed to clear cart');
+    }
+
+    // Then add all current items
+    if (cartItems.length > 0) {
+      const items = cartItems.map(item => ({
+        product: typeof item.product === 'string' ? item.product : item.product._id,
+        quantity: item.quantity
+      }));
+      
+      console.log('Sending bulk update with items:', items);
+      
+      const response = await fetch('http://localhost:5000/api/cart/bulk', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          product: item.product, 
-          quantity: item.quantity 
-        })
+        body: JSON.stringify({ items })
       });
       
       if (!response.ok) {
-        console.error('Failed to sync cart item:', item);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to sync cart items');
       }
+      
+      const result = await response.json();
+      console.log('Bulk update response:', result);
     }
     
-    // Return the original items since we're just syncing
     return cartItems;
   } catch (error) {
     console.error('Error syncing cart:', error);
